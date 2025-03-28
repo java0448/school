@@ -52,3 +52,7 @@
 Получение списка всех задач (GET /tasks)
 
     curl -X GET http://localhost:8080/tasks
+
+Вызов метода, чтобы сработал аспект @AfterThrowing
+
+    curl -X GET http://localhost:8080/tasks/exception
