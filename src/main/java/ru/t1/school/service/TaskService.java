@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Сервисный класс для управления задачами.
+ */
 @Service
 public class TaskService {
 
@@ -20,6 +23,12 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
+    /**
+     * Создает новую задачу.
+     *
+     * @param task задача для создания
+     * @return созданная задача
+     */
     public Task createTask(Task task) {
         try {
             return taskRepository.save(task);
@@ -28,6 +37,12 @@ public class TaskService {
         }
     }
 
+    /**
+     * Получает задачу по ее ID.
+     *
+     * @param id ID задачи
+     * @return задача, если найдена
+     */
     public Optional<Task> getTaskById(Long id) {
         try {
             return taskRepository.findById(id);
@@ -36,6 +51,13 @@ public class TaskService {
         }
     }
 
+    /**
+     * Обновляет существующую задачу.
+     *
+     * @param id ID задачи для обновления
+     * @param taskDetails новые данные задачи
+     * @return обновленная задача
+     */
     public Task updateTask(Long id, Task taskDetails) {
         try {
             Optional<Task> task = taskRepository.findById(id);
@@ -53,6 +75,12 @@ public class TaskService {
         }
     }
 
+    /**
+     * Удаляет задачу по ее ID.
+     *
+     * @param id ID задачи для удаления
+     * @return true, если задача была удалена, false в противном случае
+     */
     public boolean deleteTask(Long id) {
         try {
             if (taskRepository.existsById(id)) {
@@ -66,6 +94,11 @@ public class TaskService {
         }
     }
 
+    /**
+     * Получает все задачи.
+     *
+     * @return список задач
+     */
     public List<Task> getAllTasks() {
         try {
             return taskRepository.findAll();

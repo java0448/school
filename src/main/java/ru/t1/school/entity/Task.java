@@ -24,7 +24,6 @@ public class Task {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    // Constructors
     public Task() {
     }
 
@@ -35,7 +34,6 @@ public class Task {
         this.userId = userId;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

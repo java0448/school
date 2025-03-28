@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * REST-контроллер для управления задачами.
+ */
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
@@ -23,6 +26,12 @@ public class TaskController {
         this.taskService = taskService;
     }
 
+    /**
+     * Создает новую задачу.
+     *
+     * @param task задача для создания
+     * @return созданная задача
+     */
     @PostMapping
     public ResponseEntity<Task> createTask(@RequestBody Task task) {
         try {
@@ -33,6 +42,12 @@ public class TaskController {
         }
     }
 
+    /**
+     * Получает задачу по ее ID.
+     *
+     * @param id ID задачи
+     * @return задача, если найдена
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
         try {
@@ -43,6 +58,13 @@ public class TaskController {
         }
     }
 
+    /**
+     * Обновляет существующую задачу.
+     *
+     * @param id ID задачи для обновления
+     * @param taskDetails новые данные задачи
+     * @return обновленная задача
+     */
     @PutMapping("/{id}")
     public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task taskDetails) {
         try {
@@ -55,6 +77,12 @@ public class TaskController {
         }
     }
 
+    /**
+     * Удаляет задачу по ее ID.
+     *
+     * @param id ID задачи для удаления
+     * @return ответ с результатом операции
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         try {
@@ -70,6 +98,11 @@ public class TaskController {
         }
     }
 
+    /**
+     * Получает все задачи.
+     *
+     * @return список задач
+     */
     @GetMapping
     public ResponseEntity<List<Task>> getAllTasks() {
         try {
@@ -80,6 +113,11 @@ public class TaskController {
         }
     }
 
+    /**
+     * Выбрасывает тестовое исключение для демонстрации обработки исключений.
+     *
+     * @return ответ с результатом операции
+     */
     @GetMapping("/exception")
     public ResponseEntity<String> throwException() {
         throw new RuntimeException("This is a test exception");
