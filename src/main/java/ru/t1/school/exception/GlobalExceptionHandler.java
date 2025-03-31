@@ -1,51 +1,49 @@
 package ru.t1.school.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * Глобальный обработчик исключений для обработки исключений по всему приложению.
+ * Глобальный обработчик исключений для REST-контроллеров.
  */
-@ControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+@RestControllerAdvice
+public class GlobalExceptionHandler {
 
     /**
-     * Обрабатывает TaskNotFoundException.
+     * Обрабатывает исключения TaskNotFoundException.
      *
-     * @param ex исключение
-     * @param request веб-запрос
-     * @return ответ с сообщением об ошибке и HTTP-статусом
+     * @param ex исключение TaskNotFoundException
+     * @return сообщение об ошибке
      */
     @ExceptionHandler(TaskNotFoundException.class)
-    public ResponseEntity<?> handleTaskNotFoundException(TaskNotFoundException ex, WebRequest request) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleTaskNotFoundException(TaskNotFoundException ex) {
+        return ex.getMessage();
     }
 
     /**
-     * Обрабатывает TaskServiceException.
+     * Обрабатывает исключения TaskServiceException.
      *
-     * @param ex исключение
-     * @param request веб-запрос
-     * @return ответ с сообщением об ошибке и HTTP-статусом
+     * @param ex исключение TaskServiceException
+     * @return сообщение об ошибке
      */
     @ExceptionHandler(TaskServiceException.class)
-    public ResponseEntity<?> handleTaskServiceException(TaskServiceException ex, WebRequest request) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public String handleTaskServiceException(TaskServiceException ex) {
+        return ex.getMessage();
     }
 
     /**
      * Обрабатывает все остальные исключения.
      *
-     * @param ex исключение
-     * @param request веб-запрос
-     * @return ответ с сообщением об ошибке и HTTP-статусом
+     * @param ex общее исключение
+     * @return сообщение об ошибке
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest request) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public String handleGeneralException(Exception ex) {
+        return ex.getMessage();
     }
 }

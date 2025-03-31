@@ -1,5 +1,6 @@
 package ru.t1.school.aspect;
 
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.slf4j.Logger;
@@ -17,10 +18,14 @@ public class LoggingAspect {
 
     /**
      * Логирует сообщение перед выполнением любого метода в TaskController.
+     *
+     * @param joinPoint точка соединения, представляющая выполнение метода
      */
     @Before("execution(* ru.t1.school.controller.TaskController.*(..))")
-    public void logBefore() {
-        logger.info("A request is about to be processed.");
+    public void logBefore(JoinPoint joinPoint) {
+        String methodName = joinPoint.getSignature().getName();
+        Object[] methodArgs = joinPoint.getArgs();
+        logger.info("A request is about to be processed. Method: {}. Arguments: {}", methodName, methodArgs);
     }
 
     /**

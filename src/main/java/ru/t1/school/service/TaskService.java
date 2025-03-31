@@ -8,10 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Сервисный класс для управления задачами.
+ * Сервис для управления задачами.
  */
 @Service
 public class TaskService {
@@ -28,6 +27,7 @@ public class TaskService {
      *
      * @param task задача для создания
      * @return созданная задача
+     * @throws TaskServiceException если не удалось создать задачу
      */
     public Task createTask(Task task) {
         try {
@@ -41,11 +41,14 @@ public class TaskService {
      * Получает задачу по ее ID.
      *
      * @param id ID задачи
-     * @return задача, если найдена
+     * @return найденная задача
+     * @throws TaskNotFoundException если задача не найдена
+     * @throws TaskServiceException если не удалось получить задачу
      */
-    public Optional<Task> getTaskById(Long id) {
+    public Task getTaskById(Long id) {
         try {
-            return taskRepository.findById(id);
+            return taskRepository.findById(id)
+                    .orElseThrow(() -> new TaskNotFoundException("Task not found with id " + id));
         } catch (Exception e) {
             throw new TaskServiceException("Failed to retrieve task", e);
         }
@@ -57,19 +60,17 @@ public class TaskService {
      * @param id ID задачи для обновления
      * @param taskDetails новые данные задачи
      * @return обновленная задача
+     * @throws TaskNotFoundException если задача не найдена
+     * @throws TaskServiceException если не удалось обновить задачу
      */
     public Task updateTask(Long id, Task taskDetails) {
         try {
-            Optional<Task> task = taskRepository.findById(id);
-            if (task.isPresent()) {
-                Task existingTask = task.get();
-                existingTask.setTitle(taskDetails.getTitle());
-                existingTask.setDescription(taskDetails.getDescription());
-                existingTask.setUserId(taskDetails.getUserId());
-                return taskRepository.save(existingTask);
-            } else {
-                throw new TaskNotFoundException("Task not found with id " + id);
-            }
+            Task existingTask = taskRepository.findById(id)
+                    .orElseThrow(() -> new TaskNotFoundException("Task not found with id " + id));
+            existingTask.setTitle(taskDetails.getTitle());
+            existingTask.setDescription(taskDetails.getDescription());
+            existingTask.setUserId(taskDetails.getUserId());
+            return taskRepository.save(existingTask);
         } catch (Exception e) {
             throw new TaskServiceException("Failed to update task", e);
         }
@@ -79,13 +80,14 @@ public class TaskService {
      * Удаляет задачу по ее ID.
      *
      * @param id ID задачи для удаления
-     * @return true, если задача была удалена, false в противном случае
+     * @return true, если задача была успешно удалена, иначе false
+     * @throws TaskNotFoundException если задача не найдена
+     * @throws TaskServiceException если не удалось удалить задачу
      */
-    public boolean deleteTask(Long id) {
+    public void deleteTask(Long id) {
         try {
             if (taskRepository.existsById(id)) {
                 taskRepository.deleteById(id);
-                return true;
             } else {
                 throw new TaskNotFoundException("Task not found with id " + id);
             }
@@ -98,6 +100,7 @@ public class TaskService {
      * Получает все задачи.
      *
      * @return список задач
+     * @throws TaskServiceException если не удалось получить задачи
      */
     public List<Task> getAllTasks() {
         try {
