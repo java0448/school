@@ -1,10 +1,12 @@
 package ru.t1.school.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import ru.t1.school.entity.Task;
 import ru.t1.school.exception.TaskNotFoundException;
 import ru.t1.school.exception.TaskServiceException;
 import ru.t1.school.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +18,14 @@ import java.util.List;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final String taskStatusTopic;
 
     @Autowired
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, KafkaTemplate<String, String> kafkaTemplate, @Value("${kafka.topic.client}") String taskStatusTopic) {
         this.taskRepository = taskRepository;
+        this.kafkaTemplate = kafkaTemplate;
+        this.taskStatusTopic = taskStatusTopic;
     }
 
     /**
@@ -70,7 +76,12 @@ public class TaskService {
             existingTask.setTitle(taskDetails.getTitle());
             existingTask.setDescription(taskDetails.getDescription());
             existingTask.setUserId(taskDetails.getUserId());
-            return taskRepository.save(existingTask);
+            Task updatedTask = taskRepository.save(existingTask);
+
+            // Отправка сообщения в Kafka
+            kafkaTemplate.send(taskStatusTopic, id.toString(), "Task updated with new status");
+
+            return updatedTask;
         } catch (Exception e) {
             throw new TaskServiceException("Failed to update task", e);
         }
@@ -80,7 +91,6 @@ public class TaskService {
      * Удаляет задачу по ее ID.
      *
      * @param id ID задачи для удаления
-     * @return true, если задача была успешно удалена, иначе false
      * @throws TaskNotFoundException если задача не найдена
      * @throws TaskServiceException если не удалось удалить задачу
      */
