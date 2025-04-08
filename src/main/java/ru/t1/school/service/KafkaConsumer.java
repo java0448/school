@@ -3,11 +3,13 @@ package ru.t1.school.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.listener.ListenerExecutionFailedException;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.mail.MailAuthenticationException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.t1.school.dto.TaskStatusDTO;
 
 /**
  * Сервис для потребления сообщений из Kafka и отправки уведомлений по электронной почте.
@@ -35,28 +37,33 @@ public class KafkaConsumer {
     /**
      * Потребляет сообщения из темы "task-status" и отправляет уведомления.
      *
-     * @param message сообщение, полученное из темы Kafka.
-     * @throws ListenerExecutionFailedException если обработка сообщения завершилась ошибкой.
+     * @param taskStatusDTO сообщение, полученное из темы Kafka.
+     * @param ack           объект для подтверждения обработки сообщения.
      */
-    @KafkaListener(topics = "task-status", groupId = "group_id")
-    public void consume(String message) {
-        try {
-            // Логирование полученного сообщения
-            logger.info("Received message: {}", message);
+    @KafkaListener(topics = "${kafka.topic.client}", groupId = "${kafka.group-id}")
+    public void consume(TaskStatusDTO taskStatusDTO, Acknowledgment ack) {
+        // Логирование полученного сообщения
+        logger.info("Received message: {}", taskStatusDTO);
 
-            // Отправка уведомления
-            notificationService.sendNotification(notificationEmail, "Task Status Update", message);
-        } catch (MailAuthenticationException e) {
-            logger.error("Mail authentication failed for message: {}", message, e);
-            // Возможно, стоит пробросить это исключение, чтобы остановить обработку
-            throw new ListenerExecutionFailedException("Mail authentication failed", e);
-        } catch (RuntimeException e) {
-            logger.error("Runtime exception occurred while processing message: {}", message, e);
-            // Возможно, стоит пробросить это исключение, чтобы остановить обработку
-            throw new ListenerExecutionFailedException("Runtime exception occurred", e);
+        try {
+            // Асинхронная отправка уведомления
+            sendNotificationAsync(taskStatusDTO);
         } catch (Exception e) {
-            logger.error("Unexpected error processing message: {}", message, e);
-            throw new ListenerExecutionFailedException("Unexpected error occurred", e);
+            logger.error("Error while sending notification asynchronously for message: {}", taskStatusDTO, e);
+        }
+
+        // Подтверждение обработки сообщения
+        ack.acknowledge();
+    }
+
+    @Async
+    public void sendNotificationAsync(TaskStatusDTO taskStatusDTO) {
+        try {
+            notificationService.sendNotification(notificationEmail, "Task Status Update", taskStatusDTO.getDescription());
+        } catch (MailAuthenticationException e) {
+            logger.error("Mail authentication failed for message: {}", taskStatusDTO, e);
+        } catch (Exception e) {
+            logger.error("Unexpected error sending notification for message: {}", taskStatusDTO, e);
         }
     }
 }

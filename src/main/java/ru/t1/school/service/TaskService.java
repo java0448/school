@@ -1,6 +1,7 @@
 package ru.t1.school.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import ru.t1.school.dto.TaskStatusDTO;
 import ru.t1.school.entity.Task;
 import ru.t1.school.exception.TaskNotFoundException;
 import ru.t1.school.exception.TaskServiceException;
@@ -18,11 +19,14 @@ import java.util.List;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
+//    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, TaskStatusDTO> kafkaTemplate;
     private final String taskStatusTopic;
 
     @Autowired
-    public TaskService(TaskRepository taskRepository, KafkaTemplate<String, String> kafkaTemplate, @Value("${kafka.topic.client}") String taskStatusTopic) {
+//    public TaskService(TaskRepository taskRepository, KafkaTemplate<String, String> kafkaTemplate, @Value("${kafka.topic.client}") String taskStatusTopic) {
+    public TaskService(TaskRepository taskRepository, KafkaTemplate<String, TaskStatusDTO> kafkaTemplate,
+                       @Value("${kafka.topic.client}") String taskStatusTopic) {
         this.taskRepository = taskRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.taskStatusTopic = taskStatusTopic;
@@ -76,10 +80,13 @@ public class TaskService {
             existingTask.setTitle(taskDetails.getTitle());
             existingTask.setDescription(taskDetails.getDescription());
             existingTask.setUserId(taskDetails.getUserId());
+            existingTask.setStatus("UPDATE"); // Изменение статуса на UPDATE
             Task updatedTask = taskRepository.save(existingTask);
 
             // Отправка сообщения в Kafka
-            kafkaTemplate.send(taskStatusTopic, id.toString(), "Task updated with new status");
+//            kafkaTemplate.send(taskStatusTopic, id.toString(), "Task updated with status 'UPDATE'");
+            TaskStatusDTO taskStatusDTO = new TaskStatusDTO(id, "UPDATE", "Task updated with status 'UPDATE'");
+            kafkaTemplate.send(taskStatusTopic, taskStatusDTO);
 
             return updatedTask;
         } catch (Exception e) {
