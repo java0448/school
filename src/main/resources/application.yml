@@ -19,7 +19,6 @@ spring:
     port: 587
     username: java0448@yandex.ru
 #    password: real-password # сюда нужно подставить реальный пароль
-    password: shnfjzylsoiypdpd
     properties:
       mail:
         smtp:
@@ -48,4 +47,4 @@ kafka:
     num-partitions: 3 # количество разделов
     replication-factor: 1 # определяет количество копий (реплик) каждой партиции (раздела) топика, которые будут храниться на разных брокерах в кластере Kafka
   producer:
-    acks: all
+    acks: all # используется в настройках продюсера (producer) и может принимать несколько значений, каждое из которых имеет свои особенности и влияет на надежность и производительность системы

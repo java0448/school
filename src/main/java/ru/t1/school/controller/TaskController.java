@@ -1,11 +1,21 @@
 package ru.t1.school.controller;
 
-import ru.t1.school.entity.Task;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import ru.t1.school.dto.TaskDTO;
 import ru.t1.school.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 /**
@@ -13,6 +23,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/tasks")
+@Validated
 public class TaskController {
 
     private final TaskService taskService;
@@ -25,13 +36,13 @@ public class TaskController {
     /**
      * Создает новую задачу.
      *
-     * @param task задача для создания
+     * @param taskDTO задача для создания
      * @return созданная задача
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Task createTask(@RequestBody Task task) {
-        return taskService.createTask(task);
+    public TaskDTO createTask(@Valid @RequestBody TaskDTO taskDTO) {
+        return taskService.createTask(taskDTO);
     }
 
     /**
@@ -42,7 +53,7 @@ public class TaskController {
      */
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Task getTaskById(@PathVariable Long id) {
+    public TaskDTO getTaskById(@PathVariable Long id) {
         return taskService.getTaskById(id);
     }
 
@@ -50,13 +61,13 @@ public class TaskController {
      * Обновляет существующую задачу.
      *
      * @param id ID задачи для обновления
-     * @param taskDetails новые данные задачи
+     * @param taskDTO новые данные задачи
      * @return обновленная задача
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}")
-    public Task updateTask(@PathVariable Long id, @RequestBody Task taskDetails) {
-        return taskService.updateTask(id, taskDetails);
+    public TaskDTO updateTask(@PathVariable Long id, @Valid @RequestBody TaskDTO taskDTO) {
+        return taskService.updateTask(id, taskDTO);
     }
 
     /**
@@ -77,7 +88,7 @@ public class TaskController {
      */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Task> getAllTasks() {
+    public List<TaskDTO> getAllTasks() {
         return taskService.getAllTasks();
     }
 
