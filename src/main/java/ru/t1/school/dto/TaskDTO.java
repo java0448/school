@@ -1,6 +1,7 @@
-package ru.t1.school.entity;
+package ru.t1.school.dto;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,36 +10,30 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Entity-класс для представления задачи.
+ * Data Transfer Object (DTO) для представления задачи.
  * <p>
- * Этот класс используется для хранения данных о задаче в базе данных.
+ * Этот класс используется для передачи данных о задаче между клиентом и сервером.
  * Он включает в себя такую информацию о задаче, как идентификатор, заголовок, описание,
  * идентификатор пользователя и статус задачи.
  * </p>
  */
-@Entity
-@Table(name = "tasks")
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @EqualsAndHashCode
-public class Task {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class TaskDTO {
     private Long id;
 
-    @Column(name = "title", nullable = false)
+    @NotBlank(message = "Title is mandatory")
     private String title;
 
-    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "user_id", nullable = false)
+    @NotNull(message = "User ID is mandatory")
     private Long userId;
 
-    @Column(name = "status", nullable = false)
     private String status = "NEW"; // Значение по умолчанию
 }
