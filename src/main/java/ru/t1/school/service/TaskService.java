@@ -8,6 +8,7 @@ import ru.t1.school.dto.TaskStatusDTO;
 import ru.t1.school.entity.Task;
 import ru.t1.school.exception.TaskNotFoundException;
 import ru.t1.school.exception.TaskServiceException;
+import ru.t1.school.mapper.TaskMapper;
 import ru.t1.school.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -27,6 +28,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final KafkaTemplate<String, TaskStatusDTO> kafkaTemplate;
     private final String taskStatusTopic;
+    private final TaskMapper taskMapper = TaskMapper.INSTANCE;
 
     @Autowired
     public TaskService(TaskRepository taskRepository, KafkaTemplate<String, TaskStatusDTO> kafkaTemplate,
@@ -39,13 +41,13 @@ public class TaskService {
     public TaskDTO createTask(TaskDTO taskDTO) {
         try {
             logger.info("Creating task with title: {}", taskDTO.getTitle());
-            Task task = convertToEntity(taskDTO);
+            Task task = taskMapper.toEntity(taskDTO);
             if (task.getStatus() == null) {
                 task.setStatus("NEW"); // Установка значения по умолчанию, если оно не передано
             }
             Task createdTask = taskRepository.save(task);
             logger.info("Task created with ID: {}", createdTask.getId());
-            return convertToDTO(createdTask);
+            return taskMapper.toDTO(createdTask);
         } catch (Exception e) {
             logger.error("Failed to create task", e);
             throw new TaskServiceException("Failed to create task", e);
@@ -56,7 +58,7 @@ public class TaskService {
         try {
             Task task = taskRepository.findById(id)
                     .orElseThrow(() -> new TaskNotFoundException("Task not found with id " + id));
-            return convertToDTO(task);
+            return taskMapper.toDTO(task);
         } catch (Exception e) {
             logger.error("Failed to retrieve task with ID: {}", id, e);
             throw new TaskServiceException("Failed to retrieve task", e);
@@ -77,7 +79,7 @@ public class TaskService {
             TaskStatusDTO taskStatusDTO = new TaskStatusDTO(id, "UPDATE", "Task updated with status 'UPDATE'");
             kafkaTemplate.send(taskStatusTopic, taskStatusDTO);
 
-            return convertToDTO(updatedTask);
+            return taskMapper.toDTO(updatedTask);
         } catch (Exception e) {
             logger.error("Failed to update task with ID: {}", id, e);
             throw new TaskServiceException("Failed to update task", e);
@@ -100,19 +102,11 @@ public class TaskService {
     public List<TaskDTO> getAllTasks() {
         try {
             return taskRepository.findAll().stream()
-                    .map(this::convertToDTO)
+                    .map(taskMapper::toDTO)
                     .collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("Failed to retrieve tasks", e);
             throw new TaskServiceException("Failed to retrieve tasks", e);
         }
-    }
-
-    private TaskDTO convertToDTO(Task task) {
-        return new TaskDTO(task.getId(), task.getTitle(), task.getDescription(), task.getUserId(), task.getStatus());
-    }
-
-    private Task convertToEntity(TaskDTO taskDTO) {
-        return new Task(taskDTO.getId(), taskDTO.getTitle(), taskDTO.getDescription(), taskDTO.getUserId(), taskDTO.getStatus());
     }
 }
