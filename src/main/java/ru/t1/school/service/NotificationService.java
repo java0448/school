@@ -24,6 +24,12 @@ public class NotificationService {
     private final JavaMailSender mailSender;
     private final String fromEmail;
 
+    // Константы для сообщений об ошибках
+    private static final String AUTHENTICATION_FAILED_MESSAGE = "Mail authentication failed: {}";
+    private static final String SEND_FAILED_MESSAGE = "Failed to send email: {}";
+    private static final String RUNTIME_EXCEPTION_MESSAGE = "Failed to send email";
+
+
     /**
      * Конструктор для внедрения зависимостей.
      *
@@ -58,11 +64,11 @@ public class NotificationService {
             message.setText(text);
             mailSender.send(message);
         } catch (MailAuthenticationException e) {
-            logger.error("Mail authentication failed: {}", e.getMessage());
+            logger.error(AUTHENTICATION_FAILED_MESSAGE, e.getMessage());
             throw e;
         } catch (Exception e) {
-            logger.error("Failed to send email: {}", e.getMessage());
-            throw new RuntimeException("Failed to send email", e);
+            logger.error(SEND_FAILED_MESSAGE, e.getMessage());
+            throw new RuntimeException(RUNTIME_EXCEPTION_MESSAGE, e);
         }
     }
 }
