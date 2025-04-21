@@ -57,8 +57,10 @@ public class TaskService {
     public TaskDTO getTaskById(Long id) {
         try {
             Task task = taskRepository.findById(id)
-                    .orElseThrow(() -> new TaskNotFoundException("Task not found with id " + id));
+                    .orElseThrow(() -> new TaskNotFoundException(id));
             return taskMapper.toDTO(task);
+        } catch (TaskNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Failed to retrieve task with ID: {}", id, e);
             throw new TaskServiceException("Failed to retrieve task", e);
@@ -68,7 +70,7 @@ public class TaskService {
     public TaskDTO updateTask(Long id, TaskDTO taskDTO) {
         try {
             Task existingTask = taskRepository.findById(id)
-                    .orElseThrow(() -> new TaskNotFoundException("Task not found with id " + id));
+                    .orElseThrow(() -> new TaskNotFoundException(id));
             existingTask.setTitle(taskDTO.getTitle());
             existingTask.setDescription(taskDTO.getDescription());
             existingTask.setUserId(taskDTO.getUserId());
@@ -80,6 +82,8 @@ public class TaskService {
             kafkaTemplate.send(taskStatusTopic, taskStatusDTO);
 
             return taskMapper.toDTO(updatedTask);
+        } catch (TaskNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Failed to update task with ID: {}", id, e);
             throw new TaskServiceException("Failed to update task", e);
@@ -91,8 +95,10 @@ public class TaskService {
             if (taskRepository.existsById(id)) {
                 taskRepository.deleteById(id);
             } else {
-                throw new TaskNotFoundException("Task not found with id " + id);
+                throw new TaskNotFoundException(id);
             }
+        } catch (TaskNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Failed to delete task with ID: {}", id, e);
             throw new TaskServiceException("Failed to delete task", e);

@@ -1,12 +1,8 @@
 package ru.t1.school.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+
+import java.util.Objects;
 
 /**
  * Entity-класс для представления задачи.
@@ -18,12 +14,6 @@ import lombok.ToString;
  */
 @Entity
 @Table(name = "tasks")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
-@EqualsAndHashCode
 public class Task {
 
     @Id
@@ -41,4 +31,83 @@ public class Task {
 
     @Column(name = "status", nullable = false)
     private String status = "NEW"; // Значение по умолчанию
+
+    public Task() {
+    }
+
+    public Task(Long id, String title, String description, Long userId, String status) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.userId = userId;
+        this.status = status;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", userId=" + userId +
+                ", status='" + status + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return Objects.equals(id, task.id) &&
+                Objects.equals(title, task.title) &&
+                Objects.equals(description, task.description) &&
+                Objects.equals(userId, task.userId) &&
+                Objects.equals(status, task.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, description, userId, status);
+    }
 }
