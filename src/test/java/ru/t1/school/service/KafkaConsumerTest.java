@@ -21,7 +21,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith({MockitoExtension.class, SpringExtension.class})
-@TestPropertySource("classpath:application.yml")
+@TestPropertySource("classpath:application-test.yml")
 public class KafkaConsumerTest {
 
     @Mock
